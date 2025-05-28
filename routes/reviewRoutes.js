@@ -5,6 +5,7 @@ const { authenticateJWT } = require("../middleware/auth");
 
 const router = express.Router();
 
+console.log("Review routes loaded");
 // Update a review (authenticated)
 router.put(
   "/:id",

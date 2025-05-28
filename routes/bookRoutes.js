@@ -6,14 +6,6 @@ const { authenticateJWT } = require("../middleware/auth");
 
 const router = express.Router();
 
-//Get all books
-router.get("/", bookController.getBooks);
-
-// Get book by ID
-router.get("/:id", bookController.getBookById);
-
-// Create a book(authenticated)
-
 router.post(
   "/",
   authenticateJWT,
@@ -28,6 +20,15 @@ router.post(
   ],
   bookController.createBook
 );
+
+
+//Get all books
+router.get("/", bookController.getBooks);
+
+// Get book by ID
+router.get("/:id", bookController.getBookById);
+
+// Create a book(authenticated)
 
 // Add a review to a book(authenticated)
 router.post(

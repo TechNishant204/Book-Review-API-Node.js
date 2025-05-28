@@ -10,9 +10,10 @@ const generateToken = (user) => {
     { expiresIn: "1d" }
   );
 };
-
+// console.log("Auth controller loaded");
 exports.signup = async (req, res) => {
   // Validate request
+  console.log("Received signup request:", req.body);
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
@@ -26,7 +27,7 @@ exports.signup = async (req, res) => {
     let user = await User.findOne({
       $or: [{ email }, { username }],
     });
-
+    console.log("Checking for existing user:", { email, username });
     if (user) {
       return res.status(400).json({
         message: "User already exists with this email or username",
@@ -34,25 +35,23 @@ exports.signup = async (req, res) => {
     }
 
     // Create new user
-    user = new User({
-        username,
-        email,
-        password
+    const newUser = new User({
+      username,
+      email,
+      password,
     });
 
-    await user.save();
-
-    // Generate JWT token
-    const token = generateToken(user);
+    await newUser.save();
+    // console.log("User created successfully:", newUser);
+   
 
     res.status(201).json({
-        message:"User created successfully",
-        token,
-        user:{
-            id:user._id,
-            username:user.username,
-            email:user.email
-        }
+      message: "User created successfully",      
+      user: {
+        id: newUser._id,
+        username: newUser.username,
+        email: newUser.email,
+      },
     });
   } catch (error) {
     console.error("Error during signup:", error.message);
@@ -62,49 +61,49 @@ exports.signup = async (req, res) => {
   }
 };
 
-exports.login = async (req,res) => {
-    // Validate request
-    const errors = validationResult(req);
-    if(!errors.isEmpty()) {
-        return res.status(400).json({
-            errors: errors.array()
-        });
+exports.login = async (req, res) => {
+  // Validate request
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      errors: errors.array(),
+    });
+  }
+
+  const { email, password } = req.body;
+
+  try {
+    //Check if user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({
+        message: "Invalid credentials",
+      });
     }
 
-    const {email, password} = req.body;
-
-    try{
-        //Check if user exists
-        const user = await User.findOne({email});
-        if(!user){
-            return res.status(401).json({
-                message: "Invalid credentials"
-            });
-        }
-
-        //check if password matches
-        const isMatch = await user.comparePassword(password);
-        if(!isMatch){
-            return res.status(401).json({
-                message: "Invalid credentials"
-            });
-        }
-
-        // Generate JWT token
-        const token = generateToken(user);
-        res.status(200).json({
-            message: "Logged in successfully",
-            token,
-            user:{
-                id:user._id,
-                username:user.username,
-                email:user.email
-                }
-        });
-    }catch(err){
-        console.error("Error during login:", err.message);
-        return res.status(500).json({
-            message: "Server error"
-        });
+    //check if password matches
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({
+        message: "Invalid credentials",
+      });
     }
-}
+
+    // Generate JWT token
+    const token = generateToken(user);
+    res.status(200).json({
+      message: "Logged in successfully",
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+      },
+    });
+  } catch (err) {
+    console.error("Error during login:", err.message);
+    return res.status(500).json({
+      message: "Server error",
+    });
+  }
+};

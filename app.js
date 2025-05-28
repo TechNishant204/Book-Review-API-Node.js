@@ -5,6 +5,10 @@ const db = require("./config/db");
 const passport = require("passport");
 require("dotenv").config();
 require("./config/passport");
+const authRoutes = require("./routes/authRoutes");
+const bookRoutes = require("./routes/bookRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
+const searchRoutes = require("./routes/searchRoutes");
 
 // Initialize Express App
 const app = express();
@@ -23,11 +27,11 @@ app.use(passport.initialize());
 
 //Routes
 // app.use is used for mounting middleware at a specific path
-app.use("/signup", require("./routes/authRoutes"));
-app.use("/login", require("./routes/authRoutes"));
-app.use("/search", require("./routes/bookRoutes"));
-app.use("/reviews", require("./routes/reviewRoutes"));
-app.use("/search", require("./routes/searchRoutes"));
+console.log("Setting up routes...");
+app.use("/api/auth", authRoutes);
+app.use("/api/book", bookRoutes);
+app.use("/api/review", reviewRoutes);
+app.use("/api/search", searchRoutes);
 
 // Default route
 app.get("/", (req, res) => {

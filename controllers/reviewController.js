@@ -2,17 +2,18 @@ const { validationResult } = require("express-validator");
 const Review = require("../models/Review");
 const Book = require("../models/Book");
 
+// console.log("Review controller loaded");
 // Create new review
 /**
-     * Creates a new review instance
-     * @param {string} bookId - The ID of the book being reviewed
-     * @param {string} userId - The ID of the user creating the review
-     * @param {number} rating -\
-     * 
-     *  The rating given to the book (typically 1-5)
-     * @param {string} comment - The text review/comment for the book
-     * @returns {Object} The newly created review object
-*/
+ * Creates a new review instance
+ * @param {string} bookId - The ID of the book being reviewed
+ * @param {string} userId - The ID of the user creating the review
+ * @param {number} rating -\
+ *
+ *  The rating given to the book (typically 1-5)
+ * @param {string} comment - The text review/comment for the book
+ * @returns {Object} The newly created review object
+ */
 exports.createReview = async (req, res) => {
   //Validate Request
 
@@ -48,7 +49,6 @@ exports.createReview = async (req, res) => {
       });
     }
 
-
     const newReview = new Review({
       book: bookId,
       user: userId,
@@ -70,12 +70,12 @@ exports.createReview = async (req, res) => {
   }
 };
 
+// Update a review
 exports.updateReview = async (req, res) => {
+  // Validate request
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({
-      errors: errors.array(),
-    });
+    return res.status(400).json({ errors: errors.array() });
   }
 
   try {
@@ -83,8 +83,8 @@ exports.updateReview = async (req, res) => {
     const reviewId = req.params.id;
     const userId = req.user._id;
 
-    // find review
-    const review = await Review.findById(userId);
+    // Find review
+    const review = await Review.findById(reviewId);
 
     if (!review) {
       return res.status(404).json({
@@ -92,26 +92,26 @@ exports.updateReview = async (req, res) => {
       });
     }
 
-    //Check if the review belongs to the user
+    // Check if user owns the review
     if (review.user.toString() !== userId.toString()) {
       return res.status(403).json({
-        message: "You are not authorized to update this review",
+        message: "You can only update your own reviews",
       });
     }
 
-    //Update review
+    // Update review
     review.rating = rating || review.rating;
     review.comment = comment || review.comment;
     await review.save();
 
-    res.status(200).json({
+    res.json({
       message: "Review updated successfully",
       data: await Review.findById(review._id).populate("user", "username"),
     });
   } catch (error) {
     console.error("Error updating review:", error.message);
     res.status(500).json({
-      message: "Server error while updating review",
+      message: "Server error",
     });
   }
 };
