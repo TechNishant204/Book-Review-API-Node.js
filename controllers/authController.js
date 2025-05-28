@@ -24,8 +24,8 @@ exports.signup = async (req, res) => {
   const { username, email, password } = req.body;
   try {
     // Check if user already exists
-    let user = await User.findOne({
-      $or: [{ email }, { username }],
+    const user = await User.findOne({
+      $or: [{ email: email }, { username: username }],
     });
     console.log("Checking for existing user:", { email, username });
     if (user) {
@@ -43,10 +43,9 @@ exports.signup = async (req, res) => {
 
     await newUser.save();
     // console.log("User created successfully:", newUser);
-   
 
     res.status(201).json({
-      message: "User created successfully",      
+      message: "User created successfully",
       user: {
         id: newUser._id,
         username: newUser.username,
